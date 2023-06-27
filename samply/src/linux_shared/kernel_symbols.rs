@@ -160,7 +160,7 @@ pub fn kernel_module_build_id(
     path: &Path,
     extra_binary_artifact_dir: Option<&Path>,
 ) -> Option<Vec<u8>> {
-    let file = open_file_with_fallback(path, extra_binary_artifact_dir)
+    let file = open_file_with_fallback(path, extra_binary_artifact_dir, None)
         .ok()?
         .0;
     let mmap = unsafe { memmap2::MmapOptions::new().map(&file) }.ok()?;

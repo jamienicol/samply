@@ -963,6 +963,7 @@ where
         let (mut file, mut path): (Option<_>, String) = match open_file_with_fallback(
             Path::new(path),
             self.extra_binary_artifact_dir.as_deref(),
+            build_id,
         ) {
             Ok((file, path)) => (Some(file), path.to_string_lossy().to_string()),
             _ => (None, path.to_owned()),
@@ -983,6 +984,7 @@ where
                 if let Ok((pe_file, pe_path)) = open_file_with_fallback(
                     Path::new(std::str::from_utf8(&mapping.path).unwrap()),
                     self.extra_binary_artifact_dir.as_deref(),
+                    build_id,
                 ) {
                     file = Some(pe_file);
                     path = pe_path.to_string_lossy().to_string();

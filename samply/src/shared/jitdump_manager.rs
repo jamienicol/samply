@@ -52,7 +52,7 @@ impl JitDumpManager {
                     path: &Path,
                     fallback_dir: Option<&Path>,
                 ) -> Option<(JitDumpReader<std::fs::File>, PathBuf)> {
-                    let (file, path) = open_file_with_fallback(path, fallback_dir).ok()?;
+                    let (file, path) = open_file_with_fallback(path, fallback_dir, None).ok()?;
                     let reader = JitDumpReader::new(file).ok()?;
                     Some((reader, path))
                 }
