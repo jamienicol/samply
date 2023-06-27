@@ -9,14 +9,28 @@ pub fn open_file_with_fallback(
     path: &Path,
     extra_dir: Option<&Path>,
 ) -> std::io::Result<(std::fs::File, PathBuf)> {
-    match (std::fs::File::open(path), extra_dir, path.file_name()) {
-        (Ok(file), _, _) => Ok((file, path.to_owned())),
-        (Err(_), Some(extra_dir), Some(filename)) => {
-            let p: PathBuf = [extra_dir, Path::new(filename)].iter().collect();
-            std::fs::File::open(&p).map(|file| (file, p))
-        }
-        (Err(e), _, _) => Err(e),
+    let mut file = std::fs::File::open(path);
+    if let Ok(file) = file {
+        return Ok((file, path.to_owned()));
     }
+
+    if let (Some(extra_dir), Ok(path)) = (extra_dir, path.strip_prefix("/")) {
+        let p: PathBuf = [extra_dir, Path::new("binary_cache"), path].iter().collect();
+        file = std::fs::File::open(&p);
+        if let Ok(file) = file {
+            return Ok((file, p));
+        }
+    }
+
+    if let (Some(extra_dir), Some(filename)) = (extra_dir, path.file_name()) {
+        let p: PathBuf = [extra_dir, Path::new(filename)].iter().collect();
+        file = std::fs::File::open(&p);
+        if let Ok(file) = file {
+            return Ok((file, p));
+        }
+    }
+
+    return Err(file.unwrap_err());
 }
 
 pub fn lib_handle_for_jitdump(
