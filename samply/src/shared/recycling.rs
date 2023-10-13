@@ -44,13 +44,13 @@ impl<T: Ord> RecyclerByName<T> {
 
     pub fn add_to_pool(&mut self, name: &str, value: T) {
         self.0
-            .entry(name.to_string())
+            .entry(name.split("/").last().unwrap().to_string())
             .or_default()
             .push(Reverse(value));
     }
 
     pub fn recycle_by_name(&mut self, name: &str) -> Option<T> {
-        let heap = self.0.get_mut(name)?;
+        let heap = self.0.get_mut(name.split("/").last().unwrap())?;
         let process: Reverse<T> = heap
             .pop()
             .expect("We only have non-empty BinaryHeaps in this HashMap");
