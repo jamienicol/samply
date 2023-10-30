@@ -48,6 +48,23 @@ impl KernelSymbols {
             symbol_table,
         })
     }
+
+    pub fn new_for_local_files() -> Result<Self, KernelSymbolsError> {
+        let notes = std::fs::read("notes")
+            .map_err(KernelSymbolsError::CouldNotReadKernelNotes)?;
+        let build_id = build_id_from_notes_section_data(&notes)
+            .ok_or(KernelSymbolsError::CouldNotFindBuildIdNote)?
+            .to_owned();
+        let kallsyms = std::fs::read("kallsyms")
+            .map_err(KernelSymbolsError::CouldNotReadProcKallsyms)?;
+        let (base_avma, symbol_table) = parse_kallsyms(&kallsyms)?;
+        let symbol_table = Arc::new(symbol_table);
+        Ok(KernelSymbols {
+            build_id,
+            base_avma,
+            symbol_table,
+        })
+    }
 }
 
 pub fn build_id_from_notes_section_data(section_data: &[u8]) -> Option<&[u8]> {

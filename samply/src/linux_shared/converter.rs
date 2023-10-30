@@ -132,7 +132,8 @@ where
                 Some(interval_ns) => (*interval_ns, 1),
                 None => (DEFAULT_OFF_CPU_SAMPLING_INTERVAL_NS, 0),
             };
-        let kernel_symbols = match KernelSymbols::new_for_running_kernel() {
+        // let kernel_symbols = match KernelSymbols::new_for_running_kernel() {
+        let kernel_symbols = match KernelSymbols::new_for_local_files() {
             Ok(kernel_symbols) => Some(kernel_symbols),
             Err(err) => {
                 eprintln!("Could not obtain kernel symbols: {err}");
@@ -615,7 +616,7 @@ where
         }
 
         if e.pid == -1 {
-            self.add_kernel_module(e.address, e.length, dso_key, build_id.as_deref(), &path);
+            self.add_kernel_module(0xffffff80080e0000, 0xffffffffffffffff - 0xffffff80080e0000, dso_key, build_id.as_deref(), &path);
         } else {
             self.add_module_to_process(
                 e.pid,
