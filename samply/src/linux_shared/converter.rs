@@ -123,7 +123,8 @@ where
                 Some(interval_ns) => (*interval_ns, 1),
                 None => (DEFAULT_OFF_CPU_SAMPLING_INTERVAL_NS, 0),
             };
-        let kernel_symbols = match KernelSymbols::new_for_running_kernel() {
+        // let kernel_symbols = match KernelSymbols::new_for_running_kernel() {
+        let kernel_symbols = match KernelSymbols::new_for_local_files() {
             Ok(kernel_symbols) => Some(kernel_symbols),
             Err(err) => {
                 eprintln!("Could not obtain kernel symbols: {err}");
@@ -599,7 +600,15 @@ where
         }
 
         if e.pid == -1 {
-            self.add_kernel_module(e.address, e.length, dso_key, build_id.as_deref(), &path);
+            // Simpleperf gives us 0 as the MmapRecord's address. Overwrite it with the known
+            // base address from the kernel symbols
+            self.add_kernel_module(
+                self.kernel_symbols.as_ref().unwrap().base_avma,
+                0xffffffffffffffff - self.kernel_symbols.as_ref().unwrap().base_avma,
+                dso_key,
+                build_id.as_deref(),
+                &path,
+            );
         } else {
             self.add_module_to_process(
                 e.pid,
